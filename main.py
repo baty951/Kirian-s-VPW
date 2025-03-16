@@ -1,10 +1,13 @@
 import telebot; from telebot import types
 import configparser
 import time
+import datetime
 import asyncio
 from telebot.async_telebot import AsyncTeleBot
 
 async def date_check(x):
+    d = datetime.datetime.now()
+    await asyncio.sleep(x - d.hour * 3600 - d.minute * 60 - d.second)
     while True:
         print(time.strftime("%H:%M:%S", time.localtime()))
         await asyncio.sleep(x)
@@ -21,6 +24,7 @@ bot = AsyncTeleBot(token)
 # Start
 @bot.message_handler(commands=["start"])
 async def start(message):
+
     await bot.send_message(message.chat.id, "Welcome to Kirian's VPW Bot!\n\nTo get started, type /menu.")
 
 # Menu
@@ -31,7 +35,7 @@ async def menu(message):
     itembtn2 = types.KeyboardButton("📚 Library")
     itembtn3 = types.KeyboardButton("📖 About")
     markup.add(itembtn1, itembtn2, itembtn3)
-    await bot.send_message(message.chat.id, "Main Menu", reply_markup=markup)
+    await bot.send_message(message.chat.id, "", reply_markup=markup)
     inline_markup = types.InlineKeyboardMarkup()
     itembtn1 = types.InlineKeyboardButton("🔍 Search", callback_data="search")
     itembtn2 = types.InlineKeyboardButton("📚 Library", callback_data="library")
@@ -41,7 +45,7 @@ async def menu(message):
 
 async def main():
     task_bot = asyncio.create_task(bot.polling())
-    task_date_check = asyncio.create_task(date_check(10))
+    task_date_check = asyncio.create_task(date_check(86400))
 
     await task_bot
     await task_date_check
