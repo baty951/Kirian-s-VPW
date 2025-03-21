@@ -1,4 +1,4 @@
 *.ini
-create_db.py
+create_db
 __pycache__
 .venv
