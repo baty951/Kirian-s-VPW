@@ -4,12 +4,13 @@ import time
 import datetime
 import asyncio
 from telebot.async_telebot import AsyncTeleBot
+from sql_asks import user_add_to_db
 
 async def date_check(x):
     d = datetime.datetime.now()
-    await asyncio.sleep(x - d.hour * 3600 - d.minute * 60 - d.second)
+    #await asyncio.sleep(x - d.hour * 3600 - d.minute * 60 - d.second)
+    await bot.send_message(1217941962, "Hi!")
     while True:
-        print(time.strftime("%H:%M:%S", time.localtime()))
         await asyncio.sleep(x)
 
 
@@ -17,31 +18,30 @@ async def date_check(x):
 config = configparser.ConfigParser()
 config.read("config.ini")
 token = config["Bot"]["token"]
-
 # Bot
 bot = AsyncTeleBot(token)
 
 # Start
 @bot.message_handler(commands=["start"])
 async def start(message):
-
-    await bot.send_message(message.chat.id, "Welcome to Kirian's VPW Bot!\n\nTo get started, type /menu.")
+    task = asyncio.create_task(user_add_to_db(message))
+    await task
+    await bot.send_message(message.chat.id, "Welcome to Kirian's VPW Bot!\n\nTo get started, type /menu.\n\nIf you have any questions, type /help.")
 
 # Menu
+@bot.message_handler(commands=["help"])
+async def menu(message):
+    await bot.send_message(message.chat.id, "Here you can join to our group and pay for rent VDS and use it for encryption your internet traffic")
+
 @bot.message_handler(commands=["menu"])
 async def menu(message):
-    markup = types.ReplyKeyboardMarkup(row_width=1)
-    itembtn1 = types.KeyboardButton("🔍 Search")
-    itembtn2 = types.KeyboardButton("📚 Library")
-    itembtn3 = types.KeyboardButton("📖 About")
-    markup.add(itembtn1, itembtn2, itembtn3)
-    await bot.send_message(message.chat.id, "", reply_markup=markup)
-    inline_markup = types.InlineKeyboardMarkup()
-    itembtn1 = types.InlineKeyboardButton("🔍 Search", callback_data="search")
-    itembtn2 = types.InlineKeyboardButton("📚 Library", callback_data="library")
-    itembtn3 = types.InlineKeyboardButton("📖 About", callback_data="about")
-    inline_markup.add(itembtn1, itembtn2, itembtn3)
-    await bot.send_message(message.chat.id, "Select an option from the menu.", reply_markup=inline_markup)
+    markup = types.InlineKeyboardMarkup()
+    item1 = types.InlineKeyboardButton("🔐 VPN", callback_data="vpn")
+    item2 = types.InlineKeyboardButton("❌ Delete message", callback_data="delete")
+    item3 = types.InlineKeyboardButton("💰 Payment", callback_data="payment")
+    item4 = types.InlineKeyboardButton("📞 Support", callback_data="support")
+    markup.add(item1, item3, item4, item2)
+    await bot.send_message(message.chat.id, "Choose what do you want:", reply_markup=markup)
 
 async def main():
     task_bot = asyncio.create_task(bot.polling())
